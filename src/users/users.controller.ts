@@ -9,6 +9,7 @@ import { JwtAuthGuard } from 'src/guards/auth.guard';
 import { UpdateUserCategoriesDto } from './dto/category.dto';
 import { IsNumber } from 'class-validator';
 import { productSeachDto } from 'src/admin/dto/product.seach.dto';
+import { cartDto } from './dto/cart.dto';
 
 @Controller()
 export class UsersController {
@@ -84,6 +85,25 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   async sellProduct(@Req() req: any, @Param('id') id: string) {
     return this.usersService.sellProduct(req, id);
+  }
+
+  @Get('allcarts')
+  @UseGuards(JwtAuthGuard)
+  allCarts(@Req() req: any) {
+    return this.usersService.allCarts(req);
+  }
+
+
+  @Post('addcart')
+  @UseGuards(JwtAuthGuard)
+  async addCart(@Req() req: any, @Body() body: cartDto) {
+    return this.usersService.addCart(req, body);
+  }
+
+  @Delete('removecart/:id')
+  @UseGuards(JwtAuthGuard)
+  async removeCarts(@Req() req: any, @Param('id') id: string) {
+    return this.usersService.removeCart(req, id);
   }
 
 

@@ -1,9 +1,10 @@
 import { Injectable, HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
 import mongoose from 'mongoose';
 import { Model } from 'mongoose';
-import { Benefit, Category, Like, Product, UserCategory, Save, User, Sells } from './entities/user.entity';
+import { Benefit, Category, Like, Product, UserCategory, Save, User, Sells, Carts } from './entities/user.entity';
 import { InjectModel } from '@nestjs/mongoose'
 import { productSeachDto } from 'src/admin/dto/product.seach.dto';
+import { cartDto } from './dto/cart.dto';
 
 @Injectable()
 export class UsersService {
@@ -15,6 +16,7 @@ export class UsersService {
     @InjectModel('Products') private readonly Products: Model<Product>,
     @InjectModel('Likes') private readonly Likes: Model<Like>,
     @InjectModel('Sells') private readonly Sells: Model<Sells>,
+    @InjectModel('Carts') private readonly Carts: Model<Carts>,
     @InjectModel('Saveds') private readonly Saveds: Model<Save>
   ) { }
 
@@ -405,6 +407,85 @@ export class UsersService {
 
     return { message: "Success", statusCode: 200, data: product }
   }
+
+  async addCart(req: any, body: cartDto) {
+    const { id } = req.user;
+
+
+    const { cart_product } = body
+
+    if (!mongoose.Types.ObjectId.isValid(cart_product)) {
+      throw new HttpException('ID is not valid', HttpStatus.BAD_REQUEST);
+    }
+
+    const findUser = await this.Users.findById(id);
+    if (!findUser) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
+    const activeCategoryIds = findUser.user_categories
+      .filter(category => category.category_status)
+      .map(category => category.category);
+
+    const findProduct = await this.Products.findOne({
+      _id: cart_product,
+      product_category: { $in: activeCategoryIds },
+    });
+
+    if (!findProduct) {
+      throw new HttpException('Product not found', HttpStatus.NOT_FOUND);
+    }
+
+    const newCart = new this.Carts({
+      cart_user: findUser.id,
+      cart_product: findProduct.id,
+    });
+
+    await newCart.save();
+
+    return { message: 'Success', statusCode: HttpStatus.CREATED };
+  }
+
+  async removeCart(req: any, cartId: string) {
+    const { id } = req.user;
+
+    if (!mongoose.Types.ObjectId.isValid(cartId)) {
+      throw new HttpException('ID is not valid', HttpStatus.BAD_REQUEST);
+    }
+
+    const findUser = await this.Users.findById(id);
+    if (!findUser) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
+
+    const findCart = await this.Carts.findByIdAndDelete(cartId);
+
+    if (!findCart) {
+      throw new HttpException('Product not found', HttpStatus.NOT_FOUND);
+    }
+
+    return { message: 'Success', statusCode: HttpStatus.OK };
+  }
+
+
+  async allCarts(req: any) {
+    const { id } = req.user;
+
+
+    const findUser = await this.Users.findById(id);
+    if (!findUser) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
+
+    const findCarts = await this.Carts.find().populate('cart_product')
+
+    return { message: 'Success', statusCode: HttpStatus.OK, data: findCarts };
+  }
+
+
+
 
 
 }

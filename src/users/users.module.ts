@@ -10,6 +10,7 @@ import LikeSchema from 'src/models/like.schema';
 import SaveSchema from 'src/models/saveds.schema';
 import UserCategoriesSchema from 'src/models/user.categories.schema';
 import SellSchema from 'src/models/sell.schema';
+import CartSchema from 'src/models/cart.schema';
 
 
 
@@ -20,6 +21,7 @@ import SellSchema from 'src/models/sell.schema';
     { name: 'Categories', schema: CategorySchema },
     { name: 'Usercategories', schema: UserCategoriesSchema },
     { name: 'Benefits', schema: BenefitSchema },
+    { name: 'Carts', schema: CartSchema },
     { name: 'Likes', schema: LikeSchema },
     { name: 'Saveds', schema: SaveSchema },
     { name: 'Sells', schema: SellSchema },
