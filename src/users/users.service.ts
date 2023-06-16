@@ -306,13 +306,13 @@ export class UsersService {
     return {
       message: 'Success',
       statusCode: 200,
-      data: {
-        products,
-        currentPage: limitPage,
-        totalPages: Math.ceil(totalProductsCount / perPage),
-      },
+      products,
+      currentPage: limitPage,
+      totalPages: Math.ceil(totalProductsCount / perPage),
     };
   }
+
+  //ss
 
   async paginationProductsNoAuth(page: number): Promise<object> {
     const perPage = 5; // Number of products to fetch per page
