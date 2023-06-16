@@ -69,6 +69,18 @@ export class UsersController {
     return this.usersService.updateOwnCategories(req, id);
   }
 
+  @Post('like/:id')
+  @UseGuards(JwtAuthGuard)
+  likeProducts(@Req() req: any, @Param('id') id: string) {
+    return this.usersService.addLikesToProduct(req, id);
+  }
+
+  @Delete('unlike/:id')
+  @UseGuards(JwtAuthGuard)
+  unlikeProducts(@Req() req: any, @Param('id') id: string) {
+    return this.usersService.removeLikesToProduct(req, id);
+  }
+
   @Post('sell/:id')
   @UseGuards(JwtAuthGuard)
   async sellProduct(@Req() req: any, @Param('id') id: string) {
