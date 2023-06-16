@@ -101,7 +101,8 @@ export class AuthService {
 
     return { message: 'Succsessfuly Login', statusCode: 200, token: token, role: checkUsername.user_role };
   }
-  async updateProfile(id: string, body: UpdateAuthDto, file: UploadedFileInter): Promise<object> {
+  async updateProfile(req: any, body: UpdateAuthDto, file: UploadedFileInter): Promise<object> {
+    const { id } = req.user
     const { user_first_name, user_last_name, user_password, user_username } = body;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {

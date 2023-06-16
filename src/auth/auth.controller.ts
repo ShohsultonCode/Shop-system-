@@ -22,11 +22,11 @@ export class AuthController {
   }
 
 
-  @Put('update/:id')
+  @Put('update')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(fileUploadInterceptor('user_image'))
-  async updateProfile(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto, @UploadedFile() file: UploadedFileInter) {
-    return this.authService.updateProfile(id, updateAuthDto, file);
+  async updateProfile(@Req() req: any, @Body() updateAuthDto: UpdateAuthDto, @UploadedFile() file: UploadedFileInter) {
+    return this.authService.updateProfile(req, updateAuthDto, file);
   }
 
   @Get("/profile")
