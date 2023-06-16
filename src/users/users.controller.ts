@@ -109,7 +109,7 @@ export class UsersController {
 
   @Get('noauthproduct/:id')
   @UseGuards(JwtAuthGuard)
-  NoauthgetProductId(@Param('id') id: string,) {
+  NoauthgetProductId(@Param('id') id: string) {
     return this.usersService.getProductNoAuth(id);
   }
 }

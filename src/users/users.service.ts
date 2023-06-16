@@ -397,7 +397,7 @@ export class UsersService {
       throw new HttpException('Product not found', HttpStatus.BAD_REQUEST);
     }
 
-    const checkStatus = product.product_category.category_status
+    const checkStatus = product.product_category
 
     if (!checkStatus) {
       throw new HttpException('Category status does not work', HttpStatus.NOT_FOUND);
