@@ -40,7 +40,6 @@ export class UsersController {
 
 
   @Post('filter/products')
-  @UseGuards(JwtAuthGuard)
   filterProducts(@Body() productname: productSeachDto, @Req() req: any) {
     return this.usersService.searchProducts(productname, req);
   }
@@ -78,6 +77,11 @@ export class UsersController {
 
 
 
+  //For Carts
+
+
+
+
 
 
 
@@ -91,6 +95,7 @@ export class UsersController {
   productsNoAuth(@Param('id') id: number, @Req() req: any) {
     return this.usersService.paginationProductsNoAuth(id);
   }
+
 }
 
 
