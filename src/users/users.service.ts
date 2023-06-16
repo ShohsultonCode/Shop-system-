@@ -210,27 +210,24 @@ export class UsersService {
       throw new NotFoundException('User not found');
     }
 
-
     if (!mongoose.Types.ObjectId.isValid(categoryId)) {
       throw new HttpException('ID is not valid', HttpStatus.BAD_REQUEST);
     }
 
     // Find the category to update
-
     const categoryIndex = user.user_categories.findIndex(
       (userCategory) => userCategory.category.toString() === categoryId
     );
-
 
     if (categoryIndex === -1) {
       throw new NotFoundException('Category not found');
     }
 
-
-    // Update the category_status to false
-    user.user_categories[categoryIndex].category_status = false;
+    // Toggle the category_status
+    user.user_categories[categoryIndex].category_status = !user.user_categories[categoryIndex].category_status;
 
     await user.save();
+
 
     return { message: 'Category updated successfully', statusCode: 200 };
   }
