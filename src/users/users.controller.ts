@@ -40,10 +40,16 @@ export class UsersController {
 
 
   @Post('filter/products')
+  @UseGuards(JwtAuthGuard)
   filterProducts(@Body() productname: productSeachDto, @Req() req: any) {
     return this.usersService.searchProducts(productname, req);
   }
 
+
+  @Post('noauthfilter/products')
+  NoauthfilterProducts(@Body() productname: productSeachDto) {
+    return this.usersService.searchProductsNoAuth(productname);
+  }
 
   @Get('ownproducts')
   @UseGuards(JwtAuthGuard)
