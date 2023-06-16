@@ -65,6 +65,21 @@ export interface Save extends Document {
 }
 export interface Sells extends Document {
   sell_user: string;
-  sell_product: string;
+  sell_product: {
+    id: string,
+    product_name: string;
+    product_description: string;
+    product_image: string;
+    product_count: number;
+    product_category: {
+      id: string;
+      category_name: string;
+      category_status: boolean;
+    };
+    product_price: number;
+    product_like: string[];
+    product_save: string[];
+    product_status: boolean;
+  };
   sell_price: number;
 }

@@ -37,8 +37,13 @@ export class UsersService {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
 
-    const findAllSells = await this.Sells.find({ sell_user: user.id });
-    const ownProducts = await this.Products.find({ id: { $in: findAllSells.map(sell => sell.sell_product) } });
+    const findAllSells = await this.Sells.find({ sell_user: user.id }).populate('sell_product');
+
+
+    if (!findAllSells) {
+      throw new HttpException('Sells found', HttpStatus.NOT_FOUND);
+    }
+
 
     return {
       message: 'Success',
@@ -46,7 +51,7 @@ export class UsersService {
       data: user,
       status: {
         sells: findAllSells.length,
-        ownProducts: ownProducts,
+        ownproduct: findAllSells,
       },
     };
   }
