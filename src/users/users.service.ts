@@ -141,10 +141,15 @@ export class UsersService {
 
     const findUser = await this.Users.findById(userId)
 
+
+
+
+
     const activeCategoryIds = findUser.user_categories
       .filter(category => category.category_status)
       .map(category => category.category);
 
+    const totalProductsCount = await this.Products.countDocuments({ product_category: { $in: activeCategoryIds } }); // Get the total count of products for the active categories
     // Filter products by matching the product_name using regex and user's active categories
     const products = await this.Products.find({
       product_name: { $regex: product_name, $options: 'i' },
@@ -155,10 +160,11 @@ export class UsersService {
 
 
     if (products.length > 0) {
-      return { message: 'Success', statusCode: 200, data: products };
+      return {
+        message: 'Success', statusCode: 200, data: products, totalPages: Math.ceil(totalProductsCount / 6)
+      };
     } else {
       throw new HttpException('Product Not Found', HttpStatus.BAD_REQUEST);
-
     }
   }
 
