@@ -68,7 +68,7 @@ export class UsersService {
   }
   async defaultPage(req: any): Promise<object> {
     const limitPage = 1;
-    const perPage = 5; // Number of products to fetch per page
+    const perPage = 6; // Number of products to fetch per page
     const skipCount = (limitPage - 1) * perPage; // Calculate the number of products to skip
 
     const userId = req.user.id;
@@ -102,7 +102,7 @@ export class UsersService {
 
 
   async paginationProducts(page: number, req: any): Promise<object> {
-    const perPage = 5; // Number of products to fetch per page
+    const perPage = 6; // Number of products to fetch per page
     const skipCount = (page - 1) * perPage; // Calculate the number of products to skip
 
     const userId = req.user.id;
@@ -291,7 +291,7 @@ export class UsersService {
   //No auth
   async defaultPageNoAuth(): Promise<object> {
     const limitPage = 1;
-    const perPage = 5; // Number of products to fetch per page
+    const perPage = 6; // Number of products to fetch per page
     const skipCount = (limitPage - 1) * perPage; // Calculate the number of products to skip
 
     const totalProductsCount = await this.Products.countDocuments(); // Get the total count of products
@@ -313,7 +313,7 @@ export class UsersService {
   //ss
 
   async paginationProductsNoAuth(page: number): Promise<object> {
-    const perPage = 5; // Number of products to fetch per page
+    const perPage = 6; // Number of products to fetch per page
     const skipCount = (page - 1) * perPage; // Calculate the number of products to skip
 
     const totalProductsCount = await this.Products.countDocuments(); // Get the total count of products
