@@ -125,11 +125,9 @@ export class UsersService {
     return {
       message: 'Success',
       statusCode: 200,
-      data: {
-        products,
-        currentPage: page,
-        totalPages: Math.ceil(totalProductsCount / perPage),
-      },
+      products,
+      currentPage: page,
+      totalPages: Math.ceil(totalProductsCount / perPage),
     };
   }
 
