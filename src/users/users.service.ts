@@ -19,9 +19,9 @@ export class UsersService {
   ) { }
 
 
-  async userById(req: any): Promise<Object> {
+  async userById(req: any): Promise<object> {
+    const { id } = req.user;
 
-    const { id } = req.user
     if (!mongoose.Types.ObjectId.isValid(id)) {
       throw new HttpException('ID is not valid', HttpStatus.BAD_REQUEST);
     }
@@ -30,15 +30,27 @@ export class UsersService {
       .where('user_role', 'user')
       .populate({
         path: 'user_categories',
-        select: 'category_name'
+        select: 'category_name',
       });
 
     if (!user || !user.user_isactive) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
 
-    return { message: "Success", statusCode: 200, data: user }
+    const findAllSells = await this.Sells.find({ sell_user: user.id });
+    const ownProducts = await this.Products.find({ id: { $in: findAllSells.map(sell => sell.sell_product) } });
+
+    return {
+      message: 'Success',
+      statusCode: 200,
+      data: user,
+      status: {
+        sells: findAllSells.length,
+        ownProducts: ownProducts.length,
+      },
+    };
   }
+
 
 
   async lastProducts(): Promise<object> {
