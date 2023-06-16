@@ -14,10 +14,10 @@ import { productSeachDto } from 'src/admin/dto/product.seach.dto';
 export class UsersController {
   constructor(private readonly usersService: UsersService) { }
 
-  @Get('user/:id')
+  @Get('user')
   @UseGuards(JwtAuthGuard)
-  userById(@Param('id') id: string) {
-    return this.usersService.userById(id);
+  userById(@Req() req: any) {
+    return this.usersService.userById(req);
   }
 
   //sss

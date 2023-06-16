@@ -19,8 +19,9 @@ export class UsersService {
   ) { }
 
 
-  async userById(id: string): Promise<Object> {
+  async userById(req: any): Promise<Object> {
 
+    const { id } = req.user
     if (!mongoose.Types.ObjectId.isValid(id)) {
       throw new HttpException('ID is not valid', HttpStatus.BAD_REQUEST);
     }
