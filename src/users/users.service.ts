@@ -485,6 +485,62 @@ export class UsersService {
   }
 
 
+  async addCountToCart(req: any, cartId: string) {
+    const { id } = req.user;
+
+    if (!mongoose.Types.ObjectId.isValid(cartId)) {
+      throw new HttpException('ID is not valid', HttpStatus.BAD_REQUEST);
+    }
+
+    const findUser = await this.Users.findById(id);
+    if (!findUser) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
+    const findCart = await this.Carts.findById(cartId)
+
+    if (!findCart) {
+      throw new HttpException('Cart not found', HttpStatus.NOT_FOUND);
+    }
+
+    findCart.cart_product_count += 1;
+
+    await findCart.save();
+
+    return { message: 'Success', statusCode: HttpStatus.OK };
+  }
+
+
+
+  async deleteCountToCart(req: any, cartId: string) {
+    const { id } = req.user;
+
+    if (!mongoose.Types.ObjectId.isValid(cartId)) {
+      throw new HttpException('ID is not valid', HttpStatus.BAD_REQUEST);
+    }
+
+    const findUser = await this.Users.findById(id);
+    if (!findUser) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
+    const findCart = await this.Carts.findById(cartId)
+
+    if (!findCart) {
+      throw new HttpException('Cart not found', HttpStatus.NOT_FOUND);
+    }
+
+    if (findCart.cart_product_count > 0) {
+      findCart.cart_product_count -= 1;
+    } else {
+      throw new HttpException('YOu cannot remove cart count', HttpStatus.NOT_FOUND);
+    }
+
+    await findCart.save();
+
+    return { message: 'Success', statusCode: HttpStatus.OK };
+  }
+
 
 
 

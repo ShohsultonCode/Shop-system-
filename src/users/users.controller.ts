@@ -107,6 +107,19 @@ export class UsersController {
   }
 
 
+  @Post('addcount/:id')
+  @UseGuards(JwtAuthGuard)
+  async addCountCart(@Req() req: any, @Param('id') id: string) {
+    return this.usersService.addCountToCart(req, id);
+  }
+
+  @Post('removecount/:id')
+  @UseGuards(JwtAuthGuard)
+  async rmoeveCountCart(@Req() req: any, @Param('id') id: string) {
+    return this.usersService.deleteCountToCart(req, id);
+  }
+
+
 
   //For Carts
 

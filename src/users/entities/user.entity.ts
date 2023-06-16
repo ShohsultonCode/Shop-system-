@@ -101,4 +101,5 @@ export interface Carts extends Document {
     product_save: string[];
     product_status: boolean;
   };
+  cart_product_count: number;
 }
