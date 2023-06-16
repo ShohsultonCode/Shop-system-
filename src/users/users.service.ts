@@ -159,13 +159,10 @@ export class UsersService {
     }).populate('product_category')
 
 
-    if (products.length > 0) {
-      return {
-        message: 'Success', statusCode: 200, data: products, totalPages: Math.ceil(totalProductsCount / 6)
-      };
-    } else {
-      throw new HttpException('Product Not Found', HttpStatus.BAD_REQUEST);
-    }
+    return {
+      message: 'Success', statusCode: 200, data: products, totalPages: Math.ceil(totalProductsCount / 6)
+    };
+
   }
 
   async ownProducts(req: any): Promise<object> {
