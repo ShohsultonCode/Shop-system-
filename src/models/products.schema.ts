@@ -28,18 +28,6 @@ const ProductSchema: Schema = new Schema(
       type: Number,
       required: true,
     },
-    product_like: {
-      type: [String],
-      ref: 'Likes',
-      required: true,
-      default: [],
-    },
-    product_comment: {
-      type: [String],
-      ref: 'Comments',
-      required: true,
-      default: [],
-    },
     product_status: {
       type: Boolean,
       default: true,

@@ -61,7 +61,6 @@ export class UsersService {
   async lastProducts(): Promise<object> {
     const lastThreeProducts = await this.Products.find({ product_status: true, product_count: { $gt: 0 }, })
       .populate('product_category')
-      .populate('product_like')
       .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
       .limit(3); // Limit the result to three
 
@@ -122,7 +121,6 @@ export class UsersService {
 
     const products = await this.Products.find({ product_category: { $in: activeCategoryIds }, product_count: { $gt: 0 }, product_status: true })
       .populate('product_category')
-      .populate('product_like')
       .skip(skipCount)
       .limit(perPage);
 
@@ -158,7 +156,6 @@ export class UsersService {
       product_status: true,
       product_count: { $gt: 0 }
     }).populate('product_category')
-      .populate('product_like')
 
 
     if (products.length > 0) {
@@ -190,7 +187,6 @@ export class UsersService {
       product_status: true
     })
       .populate('product_category')
-      .populate('product_like')
 
     return { message: 'Success', statusCode: 200, data: products };
   }
@@ -260,7 +256,6 @@ export class UsersService {
 
     const findProduct = await this.Products.findOne({ _id: productId, product_status: true, product_count: { $gt: 0 }, })
       .populate('product_category')
-      .populate('product_like')
     const findUser = await this.Users.findOne({ _id: userId, user_isactive: true });
 
     if (!findUser) {
@@ -295,49 +290,6 @@ export class UsersService {
   }
 
 
-  async addLikesToProduct(req: any, productId: string): Promise<object> {
-    const userId = req.user.id;
-    const findProduct = await this.Products.findOne({
-      id: productId,
-      product_status: true,
-      product_count: { $gt: 0 },
-    })
-
-    if (!findProduct) {
-      throw new HttpException('Product is not defiend', HttpStatus.BAD_REQUEST);
-    }
-
-    const newLike = await new this.Likes({
-      like_user: userId,
-      like_product: productId,
-    })
-
-    await newLike.save();
-
-    return { message: "Success", statusCode: 201 }
-  }
-
-  async removeLikesToProduct(req: any, productId: string): Promise<object> {
-    const userId = req.user.id;
-
-    const findProduct = await this.Products.findOne({
-      id: productId,
-      product_status: true,
-      product_count: { $gt: 0 },
-    });
-
-    if (!findProduct) {
-      throw new HttpException('Product is not defined', HttpStatus.BAD_REQUEST);
-    }
-
-    const oldLike = await this.Likes.findOneAndDelete({ like_user: userId, like_product: productId });
-
-    if (!oldLike) {
-      throw new HttpException('You cannot remove like', HttpStatus.BAD_REQUEST);
-    }
-
-    return { message: 'Success', statusCode: 200 };
-  }
 
 
   //No auth
@@ -350,7 +302,6 @@ export class UsersService {
 
     const products = await this.Products.find({ product_status: true, product_count: { $gt: 0 }, })
       .populate('product_category')
-      .populate('product_like')
       .skip(skipCount)
       .limit(perPage);
 
@@ -373,7 +324,6 @@ export class UsersService {
 
     const products = await this.Products.find({ product_status: true, product_count: { $gt: 0 } })
       .populate('product_category')
-      .populate('product_like')
       .skip(skipCount)
       .limit(perPage);
 
@@ -400,7 +350,6 @@ export class UsersService {
       product_status: true,
       product_count: { $gt: 0 },
     }).populate('product_category')
-      .populate('product_like')
 
 
     if (products.length > 0) {
