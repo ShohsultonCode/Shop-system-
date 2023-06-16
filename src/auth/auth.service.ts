@@ -103,7 +103,7 @@ export class AuthService {
   }
   async updateProfile(req: any, body: UpdateAuthDto, file: UploadedFileInter): Promise<object> {
     const { id } = req.user
-    const { user_first_name, user_last_name, user_password, user_username, user_description } = body;
+    const { user_first_name, user_last_name, user_password, user_username, user_location, user_description } = body;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       throw new HttpException('ID is not valid', HttpStatus.BAD_REQUEST);
@@ -120,6 +120,7 @@ export class AuthService {
     if (user_first_name) {
       user.user_first_name = user_first_name;
     }
+
     if (user_description) {
       user.user_description = user_description;
     }
@@ -132,10 +133,15 @@ export class AuthService {
       user.user_username = user_username;
     }
 
+    if (user_location) {
+      user.user_location = user_location;
+    }
+
     if (user_password) {
       const hashPassword = await bcrypt.hash(user_password, 10);
       user.user_password = hashPassword;
     }
+
     if (file) {
       user.user_image = file.filename;
     }
