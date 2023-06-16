@@ -1,6 +1,6 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { CreateProductDto } from 'src/users/dto/products.dto';
-import { Benefit, Category, Like, Product, Save, User } from '../users/entities/user.entity';
+import { Benefit, Category, Like, Product, Save, Sells, User } from '../users/entities/user.entity';
 import mongoose, { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import UploadedFileInter from 'src/auth/entities/file.catch';
@@ -13,6 +13,7 @@ export class AdminService {
     @InjectModel('Categories') private readonly Categories: Model<Category>,
     @InjectModel('Products') private readonly Products: Model<Product>,
     @InjectModel('Likes') private readonly Likes: Model<Like>,
+    @InjectModel('Sells') private readonly Sells: Model<Sells>,
     @InjectModel('Saveds') private readonly Saveds: Model<Save>
   ) { }
 
@@ -53,6 +54,7 @@ export class AdminService {
 
     return { message: 'Success', statusCode: 201, data: newProduct };
   }
+
 
   async allProducts(): Promise<Object> {
     const allProducts = await this.Products.find({ product_status: true }).populate('product_category')
@@ -115,11 +117,6 @@ export class AdminService {
       }
     }
 
-
-
-
-
-
     const product = await this.Products.findById(id)
 
     if (!product) {
@@ -164,6 +161,29 @@ export class AdminService {
     await product.save()
 
     return { message: 'Success', statusCode: 200 }
+  }
+
+
+  async allSells(): Promise<Object> {
+    const allSells = await this.Sells.find()
+    return { message: "Success", statusCode: 200, data: allSells }
+  }
+
+
+
+  async dashboards(): Promise<Object> {
+    const allSells = (await this.Sells.find()).length
+    const allBenefits = await this.Benefits.findOne()
+    const allProducts = (await this.Products.find()).length
+    const allUsers = (await this.Users.find()).length
+    return {
+      message: "Success", statusCode: 200, data: {
+        alluser: allUsers,
+        allProducts: allProducts,
+        allsells: allSells,
+        allbenefits: allBenefits.benefit
+      }
+    }
   }
 
 }

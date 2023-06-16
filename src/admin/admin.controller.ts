@@ -54,4 +54,20 @@ export class AdminController {
     return this.adminService.deleteProduct(id);
   }
 
+
+  @Get('sells')
+  @UseGuards(JwtAuthGuard)
+  @UseGuards(AdminGuard)
+  allSells() {
+    return this.adminService.allSells();
+  }
+
+
+  @Get('dashboard')
+  @UseGuards(JwtAuthGuard)
+  @UseGuards(AdminGuard)
+  dashboard() {
+    return this.adminService.dashboards();
+  }
+
 }

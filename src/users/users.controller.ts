@@ -7,20 +7,40 @@ import { fileUploadInterceptor } from 'src/utils/file.catch';
 import UploadedFileInter from 'src/auth/entities/file.catch';
 import { JwtAuthGuard } from 'src/guards/auth.guard';
 import { UpdateUserCategoriesDto } from './dto/category.dto';
+import { IsNumber } from 'class-validator';
 
 @Controller()
 export class UsersController {
   constructor(private readonly usersService: UsersService) { }
 
   @Get('user/:id')
+  @UseGuards(JwtAuthGuard)
   userById(@Param('id') id: string) {
     return this.usersService.userById(id);
+  }
+
+
+  @Get('lastproducts')
+  lastProducts() {
+    return this.usersService.lastProducts();
+  }
+
+  @Get('defaultpage')
+  @UseGuards(JwtAuthGuard)
+  defaultProducts(@Req() req: any) {
+    return this.usersService.defaultPage(req);
+  }
+
+  @Get('productspagination/:id')
+  @UseGuards(JwtAuthGuard)
+  products(@Param('id') id: number, @Req() req: any) {
+    return this.usersService.paginationProducts(id, req);
   }
 
   @Get('ownproducts')
   @UseGuards(JwtAuthGuard)
   findAll(@Req() req: any) {
-    return this.usersService.allProducts(req);
+    return this.usersService.ownProducts(req);
   }
 
   @Get('categories')

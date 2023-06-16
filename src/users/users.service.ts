@@ -3,7 +3,6 @@ import mongoose from 'mongoose';
 import { Model } from 'mongoose';
 import { Benefit, Category, Like, Product, UserCategory, Save, User, Sells } from './entities/user.entity';
 import { InjectModel } from '@nestjs/mongoose'
-import { error } from 'console';
 
 @Injectable()
 export class UsersService {
@@ -25,18 +24,96 @@ export class UsersService {
       throw new HttpException('ID is not valid', HttpStatus.BAD_REQUEST);
     }
 
-    const user = await this.Users.findById(id).where('user_role', 'user')
-    if (!user) {
+    const user = await this.Users.findById(id)
+      .where('user_role', 'user')
+      .populate({
+        path: 'user_categories',
+        select: 'category_name'
+      });
+
+    if (!user || !user.user_isactive) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
 
-    const findProducts = await this.Products.findOne({ product_owner: user.id })
-
-    return { message: "Success", statusCode: 200, data: user, products: findProducts }
+    return { message: "Success", statusCode: 200, data: user }
   }
 
 
-  async allProducts(req: any): Promise<object> {
+  async lastProducts(): Promise<object> {
+    const lastThreeProducts = await this.Products.find({})
+      .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
+      .limit(3); // Limit the result to three
+
+    return { message: "Success", statusCode: 200, data: lastThreeProducts }
+  }
+  async defaultPage(req: any): Promise<object> {
+    const limitPage = 1;
+    const perPage = 5; // Number of products to fetch per page
+    const skipCount = (limitPage - 1) * perPage; // Calculate the number of products to skip
+
+    const userId = req.user.id;
+
+    const findUser = await this.Users.findById(userId)
+
+    const userCategories = findUser.user_categories;
+
+    // Get the category IDs with category_status set to true
+    const activeCategoryIds = userCategories
+      .filter(category => category.category_status)
+      .map(category => category.category);
+
+    const totalProductsCount = await this.Products.countDocuments({ product_category: { $in: activeCategoryIds } }); // Get the total count of products for the active categories
+
+    const products = await this.Products.find({ product_category: { $in: activeCategoryIds } })
+      .populate('product_category')
+      .skip(skipCount)
+      .limit(perPage);
+
+    return {
+      message: 'Success',
+      statusCode: 200,
+      data: {
+        products,
+        currentPage: limitPage,
+        totalPages: Math.ceil(totalProductsCount / perPage),
+      },
+    };
+  }
+
+  async paginationProducts(page: number, req: any): Promise<object> {
+    const perPage = 5; // Number of products to fetch per page
+    const skipCount = (page - 1) * perPage; // Calculate the number of products to skip
+
+    const userId = req.user.id;
+
+    const findUser = await this.Users.findById(userId)
+
+    const userCategories = findUser.user_categories;
+
+    const activeCategoryIds = userCategories
+      .filter(category => category.category_status)
+      .map(category => category.category);
+
+    const totalProductsCount = await this.Products.countDocuments({ product_category: { $in: activeCategoryIds } }); // Get the total count of products for the active categories
+
+    const products = await this.Products.find({ product_category: { $in: activeCategoryIds } })
+      .populate('product_category')
+      .skip(skipCount)
+      .limit(perPage);
+
+    return {
+      message: 'Success',
+      statusCode: 200,
+      data: {
+        products,
+        currentPage: page,
+        totalPages: Math.ceil(totalProductsCount / perPage),
+      },
+    };
+  }
+
+
+  async ownProducts(req: any): Promise<object> {
     const userId = req.user.id;
     const findUser = await this.Users.findById(userId).populate('user_categories');
 

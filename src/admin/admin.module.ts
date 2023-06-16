@@ -8,6 +8,7 @@ import CategorySchema from 'src/models/categpries.schema';
 import BenefitSchema from 'src/models/benefit.schema';
 import LikeSchema from 'src/models/like.schema';
 import SaveSchema from 'src/models/saveds.schema';
+import SellSchema from 'src/models/sell.schema';
 
 @Module({
   imports: [MongooseModule.forFeature([
@@ -17,6 +18,7 @@ import SaveSchema from 'src/models/saveds.schema';
     { name: 'Benefits', schema: BenefitSchema },
     { name: 'Likes', schema: LikeSchema },
     { name: 'Saveds', schema: SaveSchema },
+    { name: 'Sells', schema: SellSchema },
   ])],
   controllers: [AdminController],
   providers: [AdminService]
