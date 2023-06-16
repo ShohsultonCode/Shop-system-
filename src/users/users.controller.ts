@@ -8,6 +8,7 @@ import UploadedFileInter from 'src/auth/entities/file.catch';
 import { JwtAuthGuard } from 'src/guards/auth.guard';
 import { UpdateUserCategoriesDto } from './dto/category.dto';
 import { IsNumber } from 'class-validator';
+import { productSeachDto } from 'src/admin/dto/product.seach.dto';
 
 @Controller()
 export class UsersController {
@@ -37,6 +38,14 @@ export class UsersController {
     return this.usersService.paginationProducts(id, req);
   }
 
+
+  @Post('filter/products')
+  @UseGuards(JwtAuthGuard)
+  filterProducts(@Body() productname: productSeachDto, @Req() req: any) {
+    return this.usersService.searchProducts(productname, req);
+  }
+
+
   @Get('ownproducts')
   @UseGuards(JwtAuthGuard)
   findAll(@Req() req: any) {
@@ -65,4 +74,23 @@ export class UsersController {
   async sellProduct(@Req() req: any, @Param('id') id: string) {
     return this.usersService.sellProduct(req, id);
   }
+
+
+
+
+
+
+  //No Auth
+  @Get('facepage')
+  defaultProductsNoAuth(@Req() req: any) {
+    return this.usersService.defaultPageNoAuth();
+  }
+
+  @Get('pacepagination/:id')
+  productsNoAuth(@Param('id') id: number, @Req() req: any) {
+    return this.usersService.paginationProductsNoAuth(id);
+  }
 }
+
+
+

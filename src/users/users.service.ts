@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import { Model } from 'mongoose';
 import { Benefit, Category, Like, Product, UserCategory, Save, User, Sells } from './entities/user.entity';
 import { InjectModel } from '@nestjs/mongoose'
+import { productSeachDto } from 'src/admin/dto/product.seach.dto';
 
 @Injectable()
 export class UsersService {
@@ -40,7 +41,9 @@ export class UsersService {
 
 
   async lastProducts(): Promise<object> {
-    const lastThreeProducts = await this.Products.find({})
+    const lastThreeProducts = await this.Products.find({ product_status: true, product_count: { $gt: 0 }, })
+      .populate('product_category')
+      .populate('product_like')
       .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
       .limit(3); // Limit the result to three
 
@@ -80,6 +83,9 @@ export class UsersService {
     };
   }
 
+
+
+
   async paginationProducts(page: number, req: any): Promise<object> {
     const perPage = 5; // Number of products to fetch per page
     const skipCount = (page - 1) * perPage; // Calculate the number of products to skip
@@ -96,8 +102,9 @@ export class UsersService {
 
     const totalProductsCount = await this.Products.countDocuments({ product_category: { $in: activeCategoryIds } }); // Get the total count of products for the active categories
 
-    const products = await this.Products.find({ product_category: { $in: activeCategoryIds } })
+    const products = await this.Products.find({ product_category: { $in: activeCategoryIds }, product_count: { $gt: 0 }, product_status: true })
       .populate('product_category')
+      .populate('product_like')
       .skip(skipCount)
       .limit(perPage);
 
@@ -112,6 +119,37 @@ export class UsersService {
     };
   }
 
+
+  async searchProducts(productName: productSeachDto, req: any): Promise<object> {
+    const userId = req.user.id;
+
+    const { product_name } = productName
+
+    // Retrieve the user's categories with category_status set to true
+
+    const findUser = await this.Users.findById(userId)
+
+    const activeCategoryIds = findUser.user_categories
+      .filter(category => category.category_status)
+      .map(category => category.category);
+
+    // Filter products by matching the product_name using regex and user's active categories
+    const products = await this.Products.find({
+      product_name: { $regex: product_name, $options: 'i' },
+      product_category: { $in: activeCategoryIds },
+      product_status: true,
+      product_count: { $gt: 0 }
+    }).populate('product_category')
+      .populate('product_like')
+
+
+    if (products.length > 0) {
+      return { message: 'Success', statusCode: 200, data: products };
+    } else {
+      throw new HttpException('Product Not Found', HttpStatus.BAD_REQUEST);
+
+    }
+  }
 
   async ownProducts(req: any): Promise<object> {
     const userId = req.user.id;
@@ -128,8 +166,13 @@ export class UsersService {
       .map(category => category.category);
 
 
-    const products = await this.Products.find({ product_category: { $in: activeCategoryIds } })
-      .populate('product_category');
+    const products = await this.Products.find({
+      product_category: { $in: activeCategoryIds },
+      product_count: { $gt: 0 },
+      product_status: true
+    })
+      .populate('product_category')
+      .populate('product_like')
 
     return { message: 'Success', statusCode: 200, data: products };
   }
@@ -148,7 +191,6 @@ export class UsersService {
       path: 'user_categories',
       populate: {
         path: 'category',
-        match: { category_status: true },
       },
     });
 
@@ -192,6 +234,8 @@ export class UsersService {
 
     return { message: 'Category updated successfully', statusCode: 200 };
   }
+
+
   async sellProduct(req: any, productId: string): Promise<object> {
     const userId = req.user.id;
 
@@ -199,61 +243,163 @@ export class UsersService {
       throw new HttpException('ID is not valid', HttpStatus.BAD_REQUEST);
     }
 
-    console.log('Debug');
+    const findProduct = await this.Products.findOne({ _id: productId, product_status: true, product_count: { $gt: 0 }, })
+      .populate('product_category')
+      .populate('product_like')
+    const findUser = await this.Users.findOne({ _id: userId, user_isactive: true });
 
-    const session = await mongoose.startSession();
-    session.startTransaction();
+    if (!findUser) {
+      throw new HttpException('User Not Defined', HttpStatus.BAD_REQUEST);
+    }
 
-    try {
-      console.log('Debug');
+    if (!findProduct || findProduct.product_count === 0) {
+      throw new HttpException('Product Not Defined', HttpStatus.BAD_REQUEST);
+    }
 
-      const findProduct = await this.Products.findOne({ _id: productId, product_status: true }).populate('product_category');
-      const findUser = await this.Users.findOne({ _id: userId, user_isactive: true });
+    const Benefit = await this.Benefits.findOne();
 
-      if (!findUser) {
-        throw new HttpException('User Not Defined', HttpStatus.BAD_REQUEST);
-      }
+    const productPrice = findProduct.product_price;
 
-      if (!findProduct) {
-        throw new HttpException('Product Not Defined', HttpStatus.BAD_REQUEST);
-      }
+    if (findUser.user_payment < findProduct.product_price) {
+      throw new HttpException('You do not have enough balance', HttpStatus.BAD_REQUEST);
+    }
 
-      const Benefit = await this.Benefits.findOne();
+    findUser.user_payment -= productPrice;
+    Benefit.benefit += productPrice;
+    findProduct.product_count -= 1;
 
-      const productPrice = findProduct.product_price;
+    const newSell = new this.Sells({
+      sell_user: findUser._id,
+      sell_product: findProduct._id,
+      sell_price: productPrice,
+    });
 
-      if (findUser.user_payment < findProduct.product_price) {
-        throw new HttpException('You do not have enough balance', HttpStatus.BAD_REQUEST);
-      }
+    await Promise.all([findUser.save(), findProduct.save(), Benefit.save(), newSell.save()]);
 
-      findUser.user_payment -= productPrice;
-      Benefit.benefit += productPrice;
-      findProduct.product_count -= 1;
+    return { message: 'Success', statusCode: 200 };
+  }
 
-      const newSell = new this.Sells({
-        sell_user: findUser._id,
-        sell_product: findProduct._id,
-        sell_price: productPrice,
-      });
 
-      await Promise.all([findUser.save(), findProduct.save(), Benefit.save(), newSell.save()]);
+  async addLikesToProduct(req: any, productId: string): Promise<object> {
+    const userId = req.user.id;
+    const findProduct = await this.Products.findOne({
+      id: productId,
+      product_status: true,
+      product_count: { $gt: 0 },
+    })
 
-      await session.commitTransaction();
-      session.endSession();
+    if (!findProduct) {
+      throw new HttpException('Product is not defiend', HttpStatus.BAD_REQUEST);
+    }
 
-      return { message: 'Success', statusCode: 200 };
-    } catch (error) {
-      await session.abortTransaction();
-      session.endSession();
-      throw error;
-    } finally {
-      // Bu qism "finally" blokini bajarish uchun
-      // va tranzaksiya yakunlanishini ta'minlash uchun ishlatiladi
-      // Bu erda kerakli bo'lgan boshqa amallar bajarilishi mumkin
-      console.log('Transaction completed.');
-      return { message: 'Success', statusCode: 200 };
+    const newLike = await new this.Likes({
+      like_user: userId,
+      like_product: productId,
+    })
+
+    await newLike.save();
+
+    return { message: "Success", statusCode: 201 }
+  }
+
+  async removeLikesToProduct(req: any, productId: string): Promise<object> {
+    const userId = req.user.id;
+
+    const findProduct = await this.Products.findOne({
+      id: productId,
+      product_status: true,
+      product_count: { $gt: 0 },
+    });
+
+    if (!findProduct) {
+      throw new HttpException('Product is not defined', HttpStatus.BAD_REQUEST);
+    }
+
+    const oldLike = await this.Likes.findOneAndDelete({ like_user: userId, like_product: productId });
+
+    if (!oldLike) {
+      throw new HttpException('You cannot remove like', HttpStatus.BAD_REQUEST);
+    }
+
+    return { message: 'Success', statusCode: 200 };
+  }
+
+
+  //No auth
+  async defaultPageNoAuth(): Promise<object> {
+    const limitPage = 1;
+    const perPage = 5; // Number of products to fetch per page
+    const skipCount = (limitPage - 1) * perPage; // Calculate the number of products to skip
+
+    const totalProductsCount = await this.Products.countDocuments(); // Get the total count of products
+
+    const products = await this.Products.find({ product_status: true, product_count: { $gt: 0 }, })
+      .populate('product_category')
+      .populate('product_like')
+      .skip(skipCount)
+      .limit(perPage);
+
+    return {
+      message: 'Success',
+      statusCode: 200,
+      data: {
+        products,
+        currentPage: limitPage,
+        totalPages: Math.ceil(totalProductsCount / perPage),
+      },
+    };
+  }
+
+  async paginationProductsNoAuth(page: number): Promise<object> {
+    const perPage = 5; // Number of products to fetch per page
+    const skipCount = (page - 1) * perPage; // Calculate the number of products to skip
+
+    const totalProductsCount = await this.Products.countDocuments(); // Get the total count of products
+
+    const products = await this.Products.find({ product_status: true, product_count: { $gt: 0 } })
+      .populate('product_category')
+      .populate('product_like')
+      .skip(skipCount)
+      .limit(perPage);
+
+    return {
+      message: 'Success',
+      statusCode: 200,
+      data: {
+        products,
+        currentPage: page,
+        totalPages: Math.ceil(totalProductsCount / perPage),
+      },
+    };
+  }
+
+  async searchProductsNoAuth(productName: productSeachDto): Promise<object> {
+
+    const { product_name } = productName
+
+    // Retrieve the user's categories with category_status set to true
+
+
+    const products = await this.Products.find({
+      product_name: { $regex: product_name, $options: 'i' },
+      product_status: true,
+      product_count: { $gt: 0 },
+    }).populate('product_category')
+      .populate('product_like')
+
+
+    if (products.length > 0) {
+      return { message: 'Success', statusCode: 200, data: products };
+    } else {
+      throw new HttpException('Product Not Found', HttpStatus.BAD_REQUEST);
+
     }
   }
 
 
+
 }
+
+
+
+
