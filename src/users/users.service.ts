@@ -99,6 +99,31 @@ export class UsersService {
   }
 
 
+  async getProductId(req: any, productId: string): Promise<object> {
+
+    const userId = req.user.id;
+
+    const findUser = await this.Users.findById(userId)
+
+    const userCategories = findUser.user_categories;
+
+    // Get the category IDs with category_status set to true
+    const activeCategoryIds = userCategories
+      .filter(category => category.category_status)
+      .map(category => category.category);
+
+
+    const products = await this.Products.findOne({ product_category: { $in: activeCategoryIds } })
+      .populate('product_category')
+
+    return {
+      message: 'Success',
+      statusCode: 200,
+      data: products,
+    };
+  }
+
+
 
 
   async paginationProducts(page: number, req: any): Promise<object> {
@@ -359,6 +384,27 @@ export class UsersService {
 
 
 
+
+  async getProductNoAuth(id: string): Promise<Object> {
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new HttpException('ID is not valid', HttpStatus.BAD_REQUEST);
+    }
+
+    const product = await this.Products.findById(id).populate('product_category')
+
+    if (!product) {
+      throw new HttpException('Product not found', HttpStatus.BAD_REQUEST);
+    }
+
+    const checkStatus = product.product_category.category_status
+
+    if (!checkStatus) {
+      throw new HttpException('Category status does not work', HttpStatus.NOT_FOUND);
+    }
+
+    return { message: "Success", statusCode: 200, data: product }
+  }
 
 
 }

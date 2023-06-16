@@ -31,6 +31,11 @@ export class UsersController {
   defaultProducts(@Req() req: any) {
     return this.usersService.defaultPage(req);
   }
+  @Get('userproduct/:id')
+  @UseGuards(JwtAuthGuard)
+  getProductId(@Req() req: any, @Param('id') id: string,) {
+    return this.usersService.getProductId(req, id);
+  }
 
   @Get('productspagination/:id')
   @UseGuards(JwtAuthGuard)
@@ -102,6 +107,11 @@ export class UsersController {
     return this.usersService.paginationProductsNoAuth(id);
   }
 
+  @Get('noauthproduct/:id')
+  @UseGuards(JwtAuthGuard)
+  NoauthgetProductId(@Param('id') id: string,) {
+    return this.usersService.getProductNoAuth(id);
+  }
 }
 
 
