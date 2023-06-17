@@ -108,18 +108,14 @@ export class UsersService {
 
     const userId = req.user.id;
 
-    const findUser = await this.Users.findById(userId)
-
-    const userCategories = findUser.user_categories;
-
-    // Get the category IDs with category_status set to true
-    const activeCategoryIds = userCategories
-      .filter(category => category.category_status)
-      .map(category => category.category);
 
 
-    const products = await this.Products.findOne({ id: productId, product_category: { $in: activeCategoryIds } })
+    const products = await this.Products.findById(productId)
       .populate('product_category')
+
+    if (!products) {
+      throw new HttpException('Product Not Defiend', HttpStatus.BAD_REQUEST);
+    }
 
     return {
       message: 'Success',
