@@ -11,6 +11,7 @@ import { IsNumber } from 'class-validator';
 import { productSeachDto } from 'src/admin/dto/product.seach.dto';
 import { cartDto } from './dto/cart.dto';
 import { BuycartDto } from './dto/buycart';
+import { contactDto } from './dto/contact.dto';
 
 @Controller()
 export class UsersController {
@@ -92,6 +93,11 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   allCarts(@Req() req: any) {
     return this.usersService.allCarts(req);
+  }
+
+  @Post('contact')
+  async addContact(@Body() body: contactDto) {
+    return this.usersService.addContact(body);
   }
 
 
