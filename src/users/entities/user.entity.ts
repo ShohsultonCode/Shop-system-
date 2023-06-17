@@ -82,6 +82,7 @@ export interface Sells extends Document {
     product_status: boolean;
   };
   sell_price: number;
+  sell_product_count: number;
 }
 export interface Carts extends Document {
   cart_user: string;

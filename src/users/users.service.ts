@@ -21,7 +21,6 @@ export class UsersService {
     @InjectModel('Saveds') private readonly Saveds: Model<Save>
   ) { }
 
-
   async userById(req: any): Promise<object> {
     const { id } = req.user;
 
@@ -41,12 +40,14 @@ export class UsersService {
     }
 
     const findAllSells = await this.Sells.find({ sell_user: user.id }).populate('sell_product');
-
-
     if (!findAllSells) {
-      throw new HttpException('Sells found', HttpStatus.NOT_FOUND);
+      throw new HttpException('Sells not found', HttpStatus.NOT_FOUND);
     }
 
+    let ownProductCount = 0;
+    findAllSells.forEach((sell) => {
+      ownProductCount += sell.sell_product_count;
+    });
 
     return {
       message: 'Success',
@@ -54,7 +55,7 @@ export class UsersService {
       data: user,
       status: {
         sells: findAllSells.length,
-        ownproduct: findAllSells,
+        ownproduct: ownProductCount,
       },
     };
   }
@@ -280,16 +281,17 @@ export class UsersService {
     if (!mongoose.Types.ObjectId.isValid(productId)) {
       throw new HttpException('ID is not valid', HttpStatus.BAD_REQUEST);
     }
+    const findProduct = await this.Products.findById(productId).populate('product_category')
 
-    const findProduct = await this.Products.findOne({ id: productId, product_status: true, product_count: { $gt: 0 }, })
-      .populate('product_category')
+
     const findUser = await this.Users.findById(userId);
 
     if (!findUser) {
       throw new HttpException('User Not Defined', HttpStatus.BAD_REQUEST);
     }
 
-    if (!findProduct) {
+
+    if (!findProduct || !findProduct.product_status || findProduct.product_count === 0) {
       throw new HttpException('Product Not Defined', HttpStatus.BAD_REQUEST);
     }
 
@@ -309,6 +311,7 @@ export class UsersService {
       sell_user: findUser._id,
       sell_product: findProduct._id,
       sell_price: productPrice,
+      sell_product_count: 1
     });
 
     await Promise.all([findUser.save(), findProduct.save(), Benefit.save(), newSell.save()]);
@@ -437,6 +440,11 @@ export class UsersService {
       throw new HttpException('Product not found', HttpStatus.NOT_FOUND);
     }
 
+    const findCart = await this.Carts.findOne({ cart_product: findProduct.id, cart_user: findUser.id })
+
+    if (findCart) {
+      throw new HttpException('Product is already in cart', HttpStatus.NOT_FOUND);
+    }
     const newCart = new this.Carts({
       cart_user: findUser.id,
       cart_product: findProduct.id,
@@ -487,13 +495,69 @@ export class UsersService {
 
 
 
-
   async buyProductInCart(req: any, body: BuycartDto): Promise<Object> {
-    const { buy_product } = body
-    console.log(buy_product);
+    const { buy_product } = body;
 
-    return {}
+    try {
+      const userId = req.user.id;
+
+      for (const item of buy_product) {
+        const { product_id, product_count } = item as { product_id: string, product_count: number };
+
+        if (!mongoose.Types.ObjectId.isValid(product_id)) {
+          throw new HttpException('Invalid product ID', HttpStatus.BAD_REQUEST);
+        }
+
+        const findProduct = await this.Products.findOne({ _id: product_id, product_status: true });
+
+        if (!findProduct) {
+          throw new HttpException(`Product not found for ID: ${product_id}`, HttpStatus.NOT_FOUND);
+        }
+
+
+        if (findProduct.product_count < product_count) {
+          throw new HttpException(`Prooduct count is: ${findProduct.product_count}`, HttpStatus.NOT_FOUND);
+        }
+
+        const findUser = await this.Users.findOne({ _id: userId, user_isactive: true });
+
+        if (!findUser) {
+          throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+        }
+
+        const Benefit = await this.Benefits.findOne();
+
+        const productPrice = findProduct.product_price;
+
+        if (findUser.user_payment < productPrice * product_count) {
+          throw new HttpException('Insufficient balance', HttpStatus.BAD_REQUEST);
+        }
+
+        findUser.user_payment -= productPrice * product_count;
+        Benefit.benefit += productPrice * product_count;
+        findProduct.product_count -= product_count;
+
+        const newSell = new this.Sells({
+          sell_user: findUser._id,
+          sell_product: findProduct._id,
+          sell_price: productPrice,
+          sell_product_count: product_count
+        });
+
+        await Promise.all([findUser.save(), findProduct.save(), Benefit.save(), newSell.save()]);
+      }
+
+      // Delete user's cart
+      await this.Carts.deleteMany({ cart_user: userId });
+
+      // Return a success message or desired response
+      return { message: 'Cart items purchased successfully and cart deleted' };
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
+
+
 }
 
 
