@@ -151,10 +151,16 @@ export class UsersService {
       .skip(skipCount)
       .limit(perPage);
 
+
+    const ss = products.map((e) => {
+      return e.product_count > 0
+    })
+
+
     return {
       message: 'Success',
       statusCode: 200,
-      products,
+      products: ss,
       currentPage: page,
       totalPages: Math.ceil(totalProductsCount / perPage),
     };
