@@ -148,12 +148,11 @@ export class UsersService {
     const products = await this.Products.find({
       product_category: { $in: activeCategoryIds },
       product_status: true,
+      product_count: { $gt: 0 }
     })
       .populate('product_category')
       .skip(skipCount)
       .limit(perPage);
-
-    const filteredProducts = products.filter((product) => product.product_count > 0);
 
 
 
@@ -161,7 +160,7 @@ export class UsersService {
     return {
       message: 'Success',
       statusCode: 200,
-      products: filteredProducts,
+      products: products,
       currentPage: page,
       totalPages: Math.ceil(totalProductsCount / perPage),
     };
