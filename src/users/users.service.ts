@@ -55,7 +55,8 @@ export class UsersService {
       data: user,
       status: {
         sells: findAllSells.length,
-        ownproduct: ownProductCount,
+        ownproduct: findAllSells,
+        ownproducts: ownProductCount
       },
     };
   }
