@@ -65,6 +65,7 @@ export class UsersService {
 
 
 
+
   async lastProducts(): Promise<object> {
     const lastThreeProducts = await this.Products.find({ product_status: true, product_count: { $gt: 0 }, })
       .populate('product_category')
@@ -145,7 +146,7 @@ export class UsersService {
 
     const totalProductsCount = await this.Products.countDocuments({ product_category: { $in: activeCategoryIds } }); // Get the total count of products for the active categories
 
-    const products = await this.Products.find({ product_category: { $in: activeCategoryIds }, product_count: { $gt: 0 }, product_status: true })
+    const products = await this.Products.find({ product_category: { $in: activeCategoryIds }, product_status: true })
       .populate('product_category')
       .skip(skipCount)
       .limit(perPage);
