@@ -48,7 +48,6 @@ export class UsersController {
 
 
   @Post('filter/products')
-  @UseGuards(JwtAuthGuard)
   filterProducts(@Body() productname: productSeachDto, @Req() req: any) {
     return this.usersService.searchProducts(productname, req);
   }
