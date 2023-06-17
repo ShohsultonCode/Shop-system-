@@ -283,13 +283,13 @@ export class UsersService {
 
     const findProduct = await this.Products.findOne({ id: productId, product_status: true, product_count: { $gt: 0 }, })
       .populate('product_category')
-    const findUser = await this.Users.findOne({ id: userId, user_isactive: true });
+    const findUser = await this.Users.findById(userId);
 
     if (!findUser) {
       throw new HttpException('User Not Defined', HttpStatus.BAD_REQUEST);
     }
 
-    if (!findProduct || findProduct.product_count === 0) {
+    if (!findProduct) {
       throw new HttpException('Product Not Defined', HttpStatus.BAD_REQUEST);
     }
 
