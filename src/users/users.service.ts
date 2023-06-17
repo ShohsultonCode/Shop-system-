@@ -118,7 +118,7 @@ export class UsersService {
       .map(category => category.category);
 
 
-    const products = await this.Products.findOne({ product_category: { $in: activeCategoryIds } })
+    const products = await this.Products.findOne({ id: productId, product_category: { $in: activeCategoryIds } })
       .populate('product_category')
 
     return {
