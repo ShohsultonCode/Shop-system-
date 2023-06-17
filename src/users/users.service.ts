@@ -164,6 +164,7 @@ export class UsersService {
     const userId = req.user.id;
 
     const { product_name } = productName
+    console.log(product_name);
 
     // Retrieve the user's categories with category_status set to true
 
