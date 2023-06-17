@@ -18,6 +18,11 @@ const SellSchema: Schema = new Schema(
         sell_price: {
             type: Number,
             required: true,
+        },
+
+        sell_product_count: {
+            type: Number,
+            required: true,
         }
     },
     {

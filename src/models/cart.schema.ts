@@ -13,10 +13,6 @@ const CartSchema: Schema = new Schema(
             type: Schema.Types.ObjectId,
             ref: 'Products',
             required: true,
-        },
-        cart_product_count: {
-            type: Number,
-            default: 0
         }
     },
     {

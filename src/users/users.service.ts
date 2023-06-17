@@ -5,6 +5,7 @@ import { Benefit, Category, Like, Product, UserCategory, Save, User, Sells, Cart
 import { InjectModel } from '@nestjs/mongoose'
 import { productSeachDto } from 'src/admin/dto/product.seach.dto';
 import { cartDto } from './dto/cart.dto';
+import { BuycartDto } from './dto/buycart';
 
 @Injectable()
 export class UsersService {
@@ -280,9 +281,9 @@ export class UsersService {
       throw new HttpException('ID is not valid', HttpStatus.BAD_REQUEST);
     }
 
-    const findProduct = await this.Products.findOne({ _id: productId, product_status: true, product_count: { $gt: 0 }, })
+    const findProduct = await this.Products.findOne({ id: productId, product_status: true, product_count: { $gt: 0 }, })
       .populate('product_category')
-    const findUser = await this.Users.findOne({ _id: userId, user_isactive: true });
+    const findUser = await this.Users.findOne({ id: userId, user_isactive: true });
 
     if (!findUser) {
       throw new HttpException('User Not Defined', HttpStatus.BAD_REQUEST);
@@ -485,65 +486,14 @@ export class UsersService {
   }
 
 
-  async addCountToCart(req: any, cartId: string) {
-    const { id } = req.user;
 
-    if (!mongoose.Types.ObjectId.isValid(cartId)) {
-      throw new HttpException('ID is not valid', HttpStatus.BAD_REQUEST);
-    }
 
-    const findUser = await this.Users.findById(id);
-    if (!findUser) {
-      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
-    }
+  async buyProductInCart(req: any, body: BuycartDto): Promise<Object> {
+    const { buy_product } = body
+    console.log(buy_product);
 
-    const findCart = await this.Carts.findById(cartId)
-
-    if (!findCart) {
-      throw new HttpException('Cart not found', HttpStatus.NOT_FOUND);
-    }
-
-    findCart.cart_product_count += 1;
-
-    await findCart.save();
-
-    return { message: 'Success', statusCode: HttpStatus.OK };
+    return {}
   }
-
-
-
-  async deleteCountToCart(req: any, cartId: string) {
-    const { id } = req.user;
-
-    if (!mongoose.Types.ObjectId.isValid(cartId)) {
-      throw new HttpException('ID is not valid', HttpStatus.BAD_REQUEST);
-    }
-
-    const findUser = await this.Users.findById(id);
-    if (!findUser) {
-      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
-    }
-
-    const findCart = await this.Carts.findById(cartId)
-
-    if (!findCart) {
-      throw new HttpException('Cart not found', HttpStatus.NOT_FOUND);
-    }
-
-    if (findCart.cart_product_count > 0) {
-      findCart.cart_product_count -= 1;
-    } else {
-      throw new HttpException('YOu cannot remove cart count', HttpStatus.NOT_FOUND);
-    }
-
-    await findCart.save();
-
-    return { message: 'Success', statusCode: HttpStatus.OK };
-  }
-
-
-
-
 }
 
 

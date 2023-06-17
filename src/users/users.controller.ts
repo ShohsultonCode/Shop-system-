@@ -10,6 +10,7 @@ import { UpdateUserCategoriesDto } from './dto/category.dto';
 import { IsNumber } from 'class-validator';
 import { productSeachDto } from 'src/admin/dto/product.seach.dto';
 import { cartDto } from './dto/cart.dto';
+import { BuycartDto } from './dto/buycart';
 
 @Controller()
 export class UsersController {
@@ -106,28 +107,16 @@ export class UsersController {
     return this.usersService.removeCart(req, id);
   }
 
-
-  @Post('addcount/:id')
-  @UseGuards(JwtAuthGuard)
-  async addCountCart(@Req() req: any, @Param('id') id: string) {
-    return this.usersService.addCountToCart(req, id);
-  }
-
-  @Post('removecount/:id')
-  @UseGuards(JwtAuthGuard)
-  async rmoeveCountCart(@Req() req: any, @Param('id') id: string) {
-    return this.usersService.deleteCountToCart(req, id);
-  }
-
-
-
   //For Carts
 
 
 
 
-
-
+  @Post('buycart')
+  @UseGuards(JwtAuthGuard)
+  async buyCart(@Req() req: any, @Body() buycartDTO: BuycartDto) {
+    return this.usersService.buyProductInCart(req, buycartDTO);
+  }
 
   //No Auth
   @Get('facepage')
@@ -144,6 +133,7 @@ export class UsersController {
   NoauthgetProductId(@Param('id') id: string) {
     return this.usersService.getProductNoAuth(id);
   }
+
 }
 
 
