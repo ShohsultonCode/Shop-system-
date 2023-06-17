@@ -145,22 +145,23 @@ export class UsersService {
       .map(category => category.category);
 
     const totalProductsCount = await this.Products.countDocuments({ product_category: { $in: activeCategoryIds } }); // Get the total count of products for the active categories
-
-    const products = await this.Products.find({ product_category: { $in: activeCategoryIds }, product_status: true })
+    const products = await this.Products.find({
+      product_category: { $in: activeCategoryIds },
+      product_status: true,
+    })
       .populate('product_category')
       .skip(skipCount)
       .limit(perPage);
 
+    const filteredProducts = products.filter((product) => product.product_count > 0);
 
-    const ss = products.map((e) => {
-      return e.product_count > 0
-    })
+
 
 
     return {
       message: 'Success',
       statusCode: 200,
-      products: ss,
+      products: filteredProducts,
       currentPage: page,
       totalPages: Math.ceil(totalProductsCount / perPage),
     };
