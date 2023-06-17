@@ -1,5 +1,4 @@
 import { Injectable, HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
-import axios from 'axios'
 import mongoose from 'mongoose';
 import { Model } from 'mongoose';
 import { Benefit, Category, Like, Product, UserCategory, Save, User, Sells, Carts } from './entities/user.entity';
@@ -9,7 +8,7 @@ import { cartDto } from './dto/cart.dto';
 import { BuycartDto } from './dto/buycart';
 import { contactDto } from './dto/contact.dto';
 
-//ss
+//ss}
 @Injectable()
 export class UsersService {
   constructor(
@@ -558,21 +557,20 @@ export class UsersService {
   }
 
 
-  async addContact(body: contactDto): Promise<object> {
-    const { user_first_name, user_last_name, user_message, user_subject } = body
-    const token = process.env.BOT_TOKEN
-    const id = 5171708849
-    const mytext = `👤User First Name: ${user_first_name}, 👤User Last Name: ${user_last_name}, 🎢 Subject:${user_subject} 💬About:  ${user_message} `
-    const url = `https://api.telegram.org/bot${token}/sendMessage?chat_id=${id}&text=${mytext}`
-    await axios.post(url)
-      .then((res) => {
-        return { message: 'Success', statusCode: HttpStatus.OK };
-      })
-      .catch((err) => {
-        throw new HttpException('Some thing is wrong', HttpStatus.NOT_FOUND);
-      })
 
-    return {}
+  async addContact(body: contactDto): Promise<object> {
+    const { user_first_name, user_last_name, user_message, user_subject } = body;
+    const token = process.env.BOT_TOKEN;
+    const id = 5171708849;
+    const mytext = `👤User First Name: ${user_first_name}, 👤User Last Name: ${user_last_name}, 🎢 Subject:${user_subject} 💬About:  ${user_message}`;
+    const url = `https://api.telegram.org/bot${token}/sendMessage?chat_id=${id}&text=${encodeURIComponent(mytext)}`;
+
+    try {
+      await fetch(url, { method: 'POST' });
+      return { message: 'Success', statusCode: HttpStatus.OK };
+    } catch (error) {
+      throw new HttpException('Something went wrong', HttpStatus.NOT_FOUND);
+    }
   }
 
 }
