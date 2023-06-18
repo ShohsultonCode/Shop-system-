@@ -148,6 +148,7 @@ export class UsersService {
     const products = await this.Products.find({
       product_category: { $in: activeCategoryIds },
       product_status: true,
+      product_count: { $gt: 0 }
     })
       .populate('product_category')
       .skip(skipCount)
