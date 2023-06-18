@@ -271,7 +271,7 @@ export class AdminService {
 
     const totalProductsCount = await this.Users.countDocuments(); // Get the total count of products
 
-    const products = await this.Users.find()
+    const products = await this.Users.find({ user_role: "user" })
       .skip(skipCount)
       .limit(perPage);
 
@@ -289,7 +289,7 @@ export class AdminService {
 
     const totalProductsCount = await this.Users.countDocuments(); // Get the total count of products
 
-    const products = await this.Users.find()
+    const products = await this.Users.find({ user_role: "user" })
       .skip(skipCount)
       .limit(perPage);
 
