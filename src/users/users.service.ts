@@ -148,7 +148,6 @@ export class UsersService {
     const products = await this.Products.find({
       product_category: { $in: activeCategoryIds },
       product_status: true,
-      product_count: { $gt: 0 }
     })
       .populate('product_category')
       .skip(skipCount)
@@ -171,7 +170,6 @@ export class UsersService {
     const userId = req.user.id;
 
     const { product_name } = productName
-    console.log(product_name);
 
     // Retrieve the user's categories with category_status set to true
 
