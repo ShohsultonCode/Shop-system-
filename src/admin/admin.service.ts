@@ -170,11 +170,12 @@ export class AdminService {
   }
 
 
+  //Dashboard
 
   async dashboards(): Promise<Object> {
     const allSells = (await this.Sells.find()).length
     const allBenefits = await this.Benefits.findOne()
-    const allProducts = (await this.Products.find()).length
+    const allProducts = (await this.Products.find({ product_status: true })).length
     const allUsers = (await this.Users.find()).length
     return {
       message: "Success", statusCode: 200, data: {
