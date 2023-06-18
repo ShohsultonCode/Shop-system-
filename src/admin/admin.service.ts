@@ -186,5 +186,10 @@ export class AdminService {
     }
   }
 
+  async allUsers(): Promise<object> {
+    const allUsers = await this.Users.find({ user_isactive: true })
+    return { message: "Success", statusCode: 200, data: allUsers }
+  }
+
 }
 

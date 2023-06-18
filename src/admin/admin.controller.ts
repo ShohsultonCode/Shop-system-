@@ -70,4 +70,10 @@ export class AdminController {
     return this.adminService.dashboards();
   }
 
+  @Get('usersforadmin')
+  @UseGuards(JwtAuthGuard)
+  @UseGuards(AdminGuard)
+  usersforadmin() {
+    return this.adminService.allUsers();
+  }
 }
