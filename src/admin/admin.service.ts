@@ -175,33 +175,25 @@ export class AdminService {
   //Dashboard
 
   async dashboards(): Promise<Object> {
-    const allSells = await this.Sells.find().countDocuments();
-    const allBenefits = await this.Benefits.findOne();
-    const allUsers = await this.Users.find().countDocuments();
+    const allSells = (await this.Sells.find()).length
+    const allBenefits = await this.Benefits.findOne()
+    const allProducts = (await this.Products.find({ product_status: true }))
 
-    const productCounts = await this.Products.aggregate([
-      { $group: { _id: "$product_count", count: { $sum: 1 } } },
-      { $sort: { _id: 1 } }
-    ]);
-
-    const allProducts = productCounts.reduce((result, { _id, count }) => {
-      result[_id] = count;
-      return result;
-    }, {});
-
+    let s = 0;
+    allProducts.filter((product) => {
+      s += product.product_count
+    })
+    const allUsers = (await this.Users.find()).length
     return {
-      message: "Success",
-      statusCode: 200,
-      data: {
+      message: "Success", statusCode: 200, data: {
         alluser: allUsers,
-        allProducts,
+        allProducts: s,
         allsells: allSells,
         allbenefits: allBenefits.benefit
       }
-    };
+    }
   }
 
-  ///ss
   async allUsers(): Promise<object> {
     ///ss
     const allUsers = await this.Users.find({ user_role: "user", user_isactive: true })
