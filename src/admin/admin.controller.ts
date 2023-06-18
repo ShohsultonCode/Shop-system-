@@ -78,6 +78,21 @@ export class AdminController {
   }
 
 
+  @Get('duserpagination')
+  @UseGuards(JwtAuthGuard)
+  @UseGuards(AdminGuard)
+  duser() {
+    return this.adminService.defaultUser();
+  }
+
+  @Get('userpagination/:id')
+  @UseGuards(JwtAuthGuard)
+  @UseGuards(AdminGuard)
+  usePagination(@Param('id') id: number) {
+    return this.adminService.userPagination(id);
+  }
+
+
   @Get('dsellpagination')
   @UseGuards(JwtAuthGuard)
   @UseGuards(AdminGuard)

@@ -5,6 +5,7 @@ import mongoose, { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import UploadedFileInter from 'src/auth/entities/file.catch';
 import { UpdateProductDto } from 'src/users/dto/update-user.dto';
+import { productSeachDto } from './dto/product.seach.dto';
 @Injectable()
 export class AdminService {
   constructor(
@@ -237,6 +238,63 @@ export class AdminService {
     };
   }
 
+  async searchProductsNoAuth(productName: productSeachDto): Promise<object> {
 
+    const { product_name } = productName
+
+    // Retrieve the user's categories with category_status set to true
+
+
+    const products = await this.Users.find({
+      user_first_name: { $regex: product_name, $options: 'i' },
+      user_isactive: true,
+    })
+
+
+    if (products.length > 0) {
+      return { message: 'Success', statusCode: 200, data: products };
+    } else {
+      throw new HttpException('Product Not Found', HttpStatus.BAD_REQUEST);
+    }
+  }
+
+
+  async defaultUser(): Promise<object> {
+    const limitPage = 1;
+    const perPage = 6; // Number of products to fetch per page
+    const skipCount = (limitPage - 1) * perPage; // Calculate the number of products to skip
+
+    const totalProductsCount = await this.Users.countDocuments(); // Get the total count of products
+
+    const products = await this.Users.find()
+      .skip(skipCount)
+      .limit(perPage);
+
+    return {
+      message: 'Success',
+      statusCode: 200,
+      products,
+      currentPage: limitPage,
+      totalPages: Math.ceil(totalProductsCount / perPage),
+    };
+  }
+  async userPagination(page: number): Promise<object> {
+    const perPage = 6; // Number of products to fetch per page
+    const skipCount = (page - 1) * perPage; // Calculate the number of products to skip
+
+    const totalProductsCount = await this.Users.countDocuments(); // Get the total count of products
+
+    const products = await this.Users.find()
+      .skip(skipCount)
+      .limit(perPage);
+
+    return {
+      message: 'Success',
+      statusCode: 200,
+      products,
+      currentPage: page,
+      totalPages: Math.ceil(totalProductsCount / perPage),
+    };
+  }
 }
 
