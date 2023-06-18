@@ -195,7 +195,7 @@ export class AdminService {
   }
 
   async allUsers(): Promise<object> {
-    ///ss
+    //
     const allUsers = await this.Users.find({ user_role: "user", user_isactive: true })
     return { message: "Success", statusCode: 200, data: allUsers }
   }
