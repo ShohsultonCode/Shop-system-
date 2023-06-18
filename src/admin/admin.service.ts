@@ -194,5 +194,49 @@ export class AdminService {
     return { message: "Success", statusCode: 200, data: allUsers }
   }
 
+  async sellPagination(page: number): Promise<object> {
+    const perPage = 6; // Number of products to fetch per page
+    const skipCount = (page - 1) * perPage; // Calculate the number of products to skip
+
+    const totalProductsCount = await this.Sells.countDocuments(); // Get the total count of products
+
+    const products = await this.Sells.find()
+      .populate('sell_user')
+      .populate('sell_product')
+      .skip(skipCount)
+      .limit(perPage);
+
+    return {
+      message: 'Success',
+      statusCode: 200,
+      products,
+      currentPage: page,
+      totalPages: Math.ceil(totalProductsCount / perPage),
+    };
+  }
+
+  async defaultSell(): Promise<object> {
+    const limitPage = 1;
+    const perPage = 6; // Number of products to fetch per page
+    const skipCount = (limitPage - 1) * perPage; // Calculate the number of products to skip
+
+    const totalProductsCount = await this.Sells.countDocuments(); // Get the total count of products
+
+    const products = await this.Sells.find()
+      .populate('sell_user')
+      .populate('sell_product')
+      .skip(skipCount)
+      .limit(perPage);
+
+    return {
+      message: 'Success',
+      statusCode: 200,
+      products,
+      currentPage: limitPage,
+      totalPages: Math.ceil(totalProductsCount / perPage),
+    };
+  }
+
+
 }
 

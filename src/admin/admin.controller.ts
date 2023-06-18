@@ -76,4 +76,24 @@ export class AdminController {
   usersforadmin() {
     return this.adminService.allUsers();
   }
+
+
+  @Get('dsellpagination')
+  @UseGuards(JwtAuthGuard)
+  @UseGuards(AdminGuard)
+  dsellPagination() {
+    return this.adminService.defaultSell();
+  }
+
+
+
+  @Get('sellpagination')
+  @UseGuards(JwtAuthGuard)
+  @UseGuards(AdminGuard)
+  sellPagination(@Param('id') id: number) {
+    return this.adminService.sellPagination(id);
+  }
+
+
+
 }
