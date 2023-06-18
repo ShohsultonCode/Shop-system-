@@ -135,11 +135,12 @@ export class AdminService {
     }
 
     if (product_count) {
-      product.product_count = product_count
+      product.product_count = Number(product_count);
     }
     if (product_price) {
-      product.product_price = product_price
+      product.product_price = Number(product_price);
     }
+
 
 
     await product.save()

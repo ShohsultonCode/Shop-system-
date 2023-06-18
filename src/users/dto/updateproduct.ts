@@ -8,13 +8,13 @@ export class updatePordu {
     product_description: string;
 
 
-    @IsNumberString()
+    @IsString()
     product_count: number;
 
     @IsString()
     product_category: string;
 
-    @IsNumberString()
+    @IsString()
     product_price: number;
 
 }
