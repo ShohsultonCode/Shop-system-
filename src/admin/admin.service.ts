@@ -58,10 +58,9 @@ export class AdminService {
 
   async allProducts(): Promise<Object> {
     const allProducts = await this.Products.find({ product_status: true }).populate('product_category')
-
-    const checkCategoryStatus = allProducts.filter(product => product.product_category && product.product_category.category_status === true)
-
-    return { message: "Success", statusCode: 200, products: checkCategoryStatus.reverse() }
+    //sss
+    const checkCategoryStatus = allProducts.filter(product => product.product_category && product.product_category.category_status === true).reverse()
+    return { message: "Success", statusCode: 200, products: checkCategoryStatus }
   }
 
 
