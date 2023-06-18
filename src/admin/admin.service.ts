@@ -96,6 +96,14 @@ export class AdminService {
   async updateProduct(id: string, body: UpdateProductDto, file: UploadedFileInter): Promise<Object> {
     const { product_name, product_description, product_count, product_category, product_price } = body;
 
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new HttpException('ID is not valid', HttpStatus.BAD_REQUEST);
+    }
+    if (product_category) {
+      if (!mongoose.Types.ObjectId.isValid(product_category)) {
+        throw new HttpException('ID is not valid', HttpStatus.BAD_REQUEST);
+      }
+    }
 
     if (product_category) {
       const findProductCategory = await this.Categories.findById(product_category)
@@ -133,6 +141,7 @@ export class AdminService {
       product.product_price = Number(product_price);
     }
 
+    //s
 
 
     await product.save()
