@@ -87,7 +87,7 @@ export class AdminController {
 
 
 
-  @Get('sellpagination')
+  @Get('sellpagination:/id')
   @UseGuards(JwtAuthGuard)
   @UseGuards(AdminGuard)
   sellPagination(@Param('id') id: number) {
