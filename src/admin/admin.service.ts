@@ -61,7 +61,7 @@ export class AdminService {
 
     const checkCategoryStatus = allProducts.filter(product => product.product_category && product.product_category.category_status === true)
 
-    return { message: "Success", statusCode: 200, products: checkCategoryStatus }
+    return { message: "Success", statusCode: 200, products: checkCategoryStatus.reverse() }
   }
 
 
@@ -91,7 +91,7 @@ export class AdminService {
     return { message: "Success", statusCode: 200, products: product }
   }
 
-
+  //Update a product
 
   async updateProduct(id: string, body: UpdateProductDto, file: UploadedFileInter): Promise<Object> {
     const { product_name, product_description, product_count, product_category, product_price } = body;
