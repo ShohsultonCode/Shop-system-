@@ -1,7 +1,7 @@
 import { UploadedFile, UseGuards, UseInterceptors, Controller, Get, Post, Put, Body, Param, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateUserDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { RegisterDto } from './dto/register.dto';
+import { UpdateDto } from './dto/update.dto';
 import { LoginAuthDTO } from './dto/login.dto';
 import { fileUploadInterceptor } from 'src/utils/file.catch';
 import UploadedFileInter from './entities/file.catch';
@@ -12,7 +12,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) { }
 
   @Post('register')
-  async singup(@Body() createAuthDto: CreateUserDto) {
+  async singup(@Body() createAuthDto: RegisterDto) {
     return this.authService.register(createAuthDto);
   }
 
@@ -25,8 +25,8 @@ export class AuthController {
   @Put('update')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(fileUploadInterceptor('user_image'))
-  async updateProfile(@Req() req: any, @Body() updateAuthDto: UpdateAuthDto, @UploadedFile() file: UploadedFileInter) {
-    return this.authService.updateProfile(req, updateAuthDto, file);
+  async updateProfile(@Req() req: any, @Body() UpdateDto: UpdateDto, @UploadedFile() file: UploadedFileInter) {
+    return this.authService.updateProfile(req, UpdateDto, file);
   }
 
   @Get("/profile")

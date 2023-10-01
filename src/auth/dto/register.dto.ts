@@ -1,23 +1,27 @@
-import { IsString, IsNotEmpty, IsArray, MinLength, MaxLength } from 'class-validator';
+import { IsString, IsNotEmpty, IsArray, MinLength, MaxLength, IsEmail, IsLowercase } from 'class-validator';
 
-export class CreateUserDto {
+export class RegisterDto {
     @IsString()
     @IsNotEmpty()
-    @MinLength(3)
     @MaxLength(10)
     user_first_name: string;
 
     @IsString()
     @IsNotEmpty()
-    @MinLength(3)
     @MaxLength(10)
     user_last_name: string;
 
     @IsString()
     @IsNotEmpty()
-    @MinLength(3)
-    @MaxLength(10)
+    @MaxLength(20)
+    @IsLowercase()
     user_username: string;
+
+    @IsEmail()
+    @IsNotEmpty()
+    @MaxLength(30)
+    @IsLowercase()
+    user_email: string;
 
     @IsString()
     @IsNotEmpty()
