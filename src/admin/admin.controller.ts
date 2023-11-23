@@ -12,7 +12,7 @@ export class AdminController {
 
   constructor(private readonly adminService: AdminService) { }
 
-
+  //Products
   @Post('addproducts')
   @UseGuards(JwtAuthGuard)
   @UseGuards(AdminGuard)
