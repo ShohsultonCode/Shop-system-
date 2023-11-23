@@ -1,15 +1,11 @@
-import { IsNotEmpty, IsString, MaxLength, MinLength } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class LoginAuthDTO {
     @IsString()
     @IsNotEmpty()
-    @MinLength(3)
-    @MaxLength(30)
-    user_email: string;
+    user_username: string;
 
     @IsString()
     @IsNotEmpty()
-    @MinLength(3)
-    @MaxLength(10)
     user_password: string;
 }

@@ -5,12 +5,13 @@ import { MongooseModule } from '@nestjs/mongoose';
 import UsersSchema from 'src/models/users.schema';
 import { SharedModule } from 'src/shared/shared.module';
 import { JwtModule } from '@nestjs/jwt';
-import { ConfigModule, ConfigService } from '@nestjs/config'; // Import ConfigService
+import CategorySchema from 'src/models/categpries.schema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: 'Users', schema: UsersSchema },
+      { name: 'Categories', schema: CategorySchema }
     ]),
     SharedModule,
     JwtModule.register({
@@ -20,6 +21,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config'; // Import ConfigSe
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService],
+  providers: [AuthService]
 })
 export class AuthModule { }

@@ -1,8 +1,10 @@
 import { Schema } from 'mongoose';
+import UserCategoriesSchema from './user.categories.schema';
 
 export enum UserRole {
   User = 'user',
   Admin = 'admin',
+  Seller = 'seller',
 }
 
 const UsersSchema: Schema = new Schema(
@@ -17,12 +19,6 @@ const UsersSchema: Schema = new Schema(
     },
     user_username: {
       type: String,
-      unique: true,
-      required: true,
-    },
-    user_email: {
-      type: String,
-      unique: true,
       required: true,
     },
     user_password: {
@@ -47,6 +43,14 @@ const UsersSchema: Schema = new Schema(
       required: true,
       default: 'user.png',
     },
+    user_payment: {
+      type: Number,
+      required: true,
+      default: 100000,
+    },
+    user_categories: [
+      UserCategoriesSchema,
+    ],
     user_last_login_date: {
       type: Date,
       required: true,
