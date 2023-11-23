@@ -8,9 +8,11 @@ import { AuthModule } from './auth/auth.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { ImagesModule } from './images/images.module';
 import { AdminModule } from './admin/admin.module';
+import { EmailModule } from './email/email.module';
+
 @Module({
   imports: [
-    MongooseModule.forRoot('mongodb+srv://shohsultoncode:123326125@shop.iobzkwq.mongodb.net/?retryWrites=true&w=majority'),
+    MongooseModule.forRoot('mongodb+srv://shohsulton3039:NYyMzVeJeUix9vBD@discover.xhevfxo.mongodb.net/'),
     MulterModule.register({
       dest: './uploads',
     }),
@@ -19,6 +21,7 @@ import { AdminModule } from './admin/admin.module';
     AuthModule,
     ImagesModule,
     AdminModule,
+    EmailModule,
   ],
   controllers: [AppController],
   providers: [AppService],

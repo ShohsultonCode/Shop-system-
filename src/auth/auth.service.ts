@@ -1,10 +1,10 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { RegisterDto } from './dto/register.dto';
+import { UpdateDto } from './dto/update.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { JwtService } from '@nestjs/jwt';
 import mongoose, { Model } from 'mongoose';
-import { Category, User } from 'src/users/entities/user.entity';
+import { User } from 'src/users/entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { LoginAuthDTO } from './dto/login.dto';
 import UploadedFileInter from './entities/file.catch';
@@ -14,69 +14,68 @@ import UploadedFileInter from './entities/file.catch';
 export class AuthService {
   constructor(
     @InjectModel('Users') private readonly Users: Model<User>,
-    @InjectModel('Categories') private readonly Categories: Model<Category>,
     private jwtService: JwtService,
   ) { }
 
 
-  async register(body: CreateUserDto): Promise<object> {
-    const { user_first_name, user_last_name, user_password, user_username } = body;
+  //Authrazations
+
+
+  //Start Register 
+  async register(body: RegisterDto): Promise<object> {
+    const { user_first_name, user_last_name, user_password, user_username, user_email } = body;
 
     const checkUsername = await this.Users.findOne({
       user_username: user_username.toLowerCase().trim(),
     });
 
+
     if (checkUsername) {
       throw new HttpException(
         'This username already exists',
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.FOUND,
       );
     }
 
+
+    //Hash Password
     const hashPassword = await bcrypt.hash(user_password, 10);
 
-    const allCategories = await this.Categories.find();
 
-    const userCategories = allCategories.map((category) => ({
-      category: category._id,
-      category_status: true,
-    }));
-
-    const newUser = new this.Users({
-      user_first_name: user_first_name,
-      user_last_name: user_last_name,
-      user_username: user_username.toLowerCase(),
+    const newUser = await new this.Users({
+      ...body,
       user_password: hashPassword,
-      user_categories: userCategories,
-      user_role: 'user',
-
+      user_role: "user"
     });
+
+
 
     await newUser.save();
 
-    const userId = newUser._id;
-    const userRole = newUser.user_role;
 
-    const payload = { id: userId, role: userRole };
+    const payload = { id: newUser._id, role: newUser.user_role };
 
     const token = this.jwtService.sign(payload);
 
     return { message: 'Successfully registered', statusCode: 201, token: token, role: newUser.user_role };
   }
+  //End Register
 
-  async login(
-    body: LoginAuthDTO,
-  ): Promise<object> {
-    const { user_username, user_password } = body;
+
+
+  //Start Login
+
+  async login(body: LoginAuthDTO): Promise<object> {
+    const { user_email, user_password } = body;
 
     const checkUsername = await this.Users.findOne({
-      user_username: user_username.toLowerCase().trim(),
+      user_email: user_email
     });
 
     if (!checkUsername) {
       throw new HttpException(
-        'Invalid  username or password',
-        HttpStatus.BAD_REQUEST,
+        'Invalid email or password',
+        HttpStatus.NOT_FOUND,
       );
     }
 
@@ -88,22 +87,24 @@ export class AuthService {
     if (!hash) {
       throw new HttpException(
         'Invalid password or username',
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.NON_AUTHORITATIVE_INFORMATION,
       );
     }
 
-    const userId = checkUsername._id;
-    const userRole = checkUsername.user_role
 
-    const payload = { id: userId, role: userRole };
+    const payload = { id: checkUsername._id, role: checkUsername.user_role };
 
-    const token = await this.jwtService.sign(payload);
+    const token = this.jwtService.sign(payload);
 
     return { message: 'Succsessfuly Login', statusCode: 200, token: token, role: checkUsername.user_role };
   }
-  async updateProfile(req: any, body: UpdateAuthDto, file: UploadedFileInter): Promise<object> {
-    const { id } = req.user
-    const { user_first_name, user_last_name, user_password, user_username, user_location, user_description } = body;
+
+  //End Login 
+
+
+
+  async updateProfile(req: any, body: UpdateDto, file: UploadedFileInter): Promise<object> {
+    const { id } = req.user;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       throw new HttpException('ID is not valid', HttpStatus.BAD_REQUEST);
@@ -111,35 +112,17 @@ export class AuthService {
 
     const user = await this.Users.findById(id);
 
-
     if (!user) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
 
+    const updateFields = ['user_first_name', 'user_last_name', 'user_password', 'user_username', 'user_location', 'user_description'];
 
-    if (user_first_name) {
-      user.user_first_name = user_first_name;
-    }
-
-    if (user_description) {
-      user.user_description = user_description;
-    }
-
-    if (user_last_name) {
-      user.user_last_name = user_last_name;
-    }
-
-    if (user_username) {
-      user.user_username = user_username;
-    }
-
-    if (user_location) {
-      user.user_location = user_location;
-    }
-
-    if (user_password) {
-      const hashPassword = await bcrypt.hash(user_password, 10);
-      user.user_password = hashPassword;
+    // Loop through the updateFields and update corresponding properties if they exist in the request body
+    for (const field of updateFields) {
+      if (body[field]) {
+        user[field] = body[field];
+      }
     }
 
     if (file) {
