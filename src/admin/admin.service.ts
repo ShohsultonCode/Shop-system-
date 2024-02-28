@@ -6,6 +6,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import UploadedFileInter from 'src/auth/entities/file.catch';
 import { UpdateProductDto } from 'src/users/dto/update-user.dto';
 import { productSeachDto } from './dto/product.seach.dto';
+import { CategoryDto } from 'src/users/dto/categories.dto';
+import CategorySchema from 'src/models/categpries.schema';
 @Injectable()
 export class AdminService {
   constructor(
@@ -55,6 +57,8 @@ export class AdminService {
 
     return { message: 'Success', statusCode: 201, data: newProduct };
   }
+
+
 
 
   async allProducts(): Promise<Object> {
@@ -301,5 +305,45 @@ export class AdminService {
       totalPages: Math.ceil(totalProductsCount / perPage),
     };
   }
+
+  //categories
+
+  async addCategory(body: CategoryDto, file: UploadedFileInter, req: any): Promise<Object> {
+    const { category_name } = body
+    if (!file) {
+      throw new HttpException('Category Image is required', HttpStatus.NOT_FOUND);
+    }
+
+    const checkNameofCategory = await this.Categories.findOne({
+      category_name:category_name.toLowerCase()
+    })
+    if (checkNameofCategory) {
+      throw new HttpException('Category already exsist', HttpStatus.BAD_REQUEST);
+    }
+    const newCategory = await this.Categories.create({
+      category_name: category_name.toLowerCase(),
+      category_status: true,
+      category_image: file.filename
+    })
+
+    return {
+      message: 'Success',
+      statusCode: 200,
+    }
+  }
+
+  async getCategories(req: any): Promise<Object> {
+    const categories = await this.Categories.find()
+
+    return {
+      message: 'Success',
+      statusCode: 200,
+      categories:categories
+    }
+  }
+
 }
+
+
+
 

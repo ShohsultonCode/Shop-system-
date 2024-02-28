@@ -31,6 +31,7 @@ export interface Benefit extends Document {
 export interface Category extends Document {
   category_name: string;
   category_status: boolean;
+  category_image:string;
 }
 
 export interface UserCategory extends Document {

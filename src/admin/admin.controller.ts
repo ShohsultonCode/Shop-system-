@@ -6,6 +6,7 @@ import { JwtAuthGuard } from 'src/guards/auth.guard';
 import UploadedFileInter from 'src/auth/entities/file.catch';
 import { AdminGuard } from 'src/guards/checkrole.guard';
 import { UpdateProductDto } from 'src/users/dto/update-user.dto';
+import { CategoryDto } from 'src/users/dto/categories.dto';
 
 @Controller()
 export class AdminController {
@@ -110,5 +111,24 @@ export class AdminController {
   }
 
 
+
+  #Categories
+
+
+  @Post('addcategory')
+  @UseGuards(JwtAuthGuard)
+  @UseGuards(AdminGuard)
+  @UseInterceptors(fileUploadInterceptor('category_image'))
+  addCategories(@Body() createCategory: CategoryDto, @UploadedFile() file: UploadedFileInter, @Req() req: any) {
+    return this.adminService.addCategory(createCategory, file, req);
+  }
+  
+
+  @Get('categories')
+  @UseGuards(JwtAuthGuard)
+  @UseGuards(AdminGuard)
+  getCategories(@Req() req: any) {
+    return this.adminService.getCategories(req);
+  }
 
 }
